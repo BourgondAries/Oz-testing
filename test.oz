@@ -36,16 +36,37 @@ define
 		{System.showInfo Y}
 	end
 
-
-
 	local X in
 		X = {Fact 32}
-		{System.showInfo X}
+		{System.showInfo ~X}
 	end
 
+	local X in
+		X = 1
+	end
 
+	local
+		C = {NewCell 0}
+		V
+	in
+		{System.showInfo '===='}
+		{System.showInfo @C}
+		C := 5
+		{System.showInfo @C}
+		V = @C
+		{System.showInfo V}
+		{System.showInfo '===='}
+	end
 
-
+	local A B in
+		A = 5
+		B = 31
+		{System.showInfo
+			if (A > B) then 'Heeey' else 'ewooo' end}
+		local A in
+			A = 3
+		end
+	end
 
 	{Application.exit 0}
 end
