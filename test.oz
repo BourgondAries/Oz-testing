@@ -1,6 +1,7 @@
 functor
 import
 	Application
+	Browser
 	System
 define
 	{System.showInfo 'Hi'}
@@ -18,7 +19,33 @@ define
 		{NewName Y}
 		B = true
 		{System.showInfo X}
-		{System.showInfo {Fact 1012}}
+		{System.showInfo {Fact 12}}
 	end
+	{System.showInfo'Here we just have running code it seems'}
+
+	local X Y Z in
+		Y = 2
+		Z = 3
+		X = Y * Z
+		{System.showInfo X}
+	end
+
+	local X Y in
+		X = 'this is magic'
+		Y = X
+		{System.showInfo Y}
+	end
+
+
+
+	local X in
+		X = {Fact 32}
+		{System.showInfo X}
+	end
+
+
+
+
+
 	{Application.exit 0}
 end
