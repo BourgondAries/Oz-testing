@@ -105,20 +105,24 @@ define
 
 	fun {FindCar Xs Ys}
 		case Xs of nil then nil
-		else
+		[] X|Xt then
 			case Ys of Y|Yz then
-				local
-					A = {SplitTrain Xs Y}
-					AfterY = {Nth A 2}
-					BeforeY = {Nth A 1}
-					AfterYCount = {Length AfterY}+1
-					BeforeYCount = {Length BeforeY}
-					NewState = AfterY|BeforeY
-				in
-					trackA(AfterYCount)|trackB(BeforeYCount)|trackA(~AfterYCount)|trackB(~BeforeYCount)|{FindCar NewState Yz}
+				if Ys==Xs then
+					{FindCar Xt Yz}
+				else
+					local
+						A = {SplitTrain Xs Y}
+						AfterY = {Nth A 2}
+						BeforeY = {Nth A 1}
+						YWithAfterYCount = {Length AfterY}+1
+						BeforeYCount = {Length BeforeY}
+						NewState = AfterY|BeforeY
+					in
+						trackA(YWithAfterYCount)|trackB(BeforeYCount)|trackA(~YWithAfterYCount)|trackB(~BeforeYCount)|{FindCar NewState Yz}
+					end
 				end
 			else nil end
-		end
+		else nil end
 	end
 
 	proc {PrintList List}
@@ -170,7 +174,8 @@ define
 		{System.showInfo {Nth {Nth B 1} 1}}
 		A = {FindCar [a b] [b a]}
 	in
-		{System.showInfo {Nth A 4}}
+		{System.showInfo {Length A}}
+		{System.showInfo {Nth A 6}}
 	end
 	{Application.exit 0}
 
