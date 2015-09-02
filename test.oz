@@ -26,13 +26,15 @@ define
 	end
 
 	fun {ApplyMoves State Moves}
-		case Moves of nil then
-			State
-		[] Move|RemainingMoves then
+		case Moves of Move|RemainingMoves then
 			local NewState
 				NewState = {ApplyMoves State Move}
 			in
-				State|NewState|{ApplyMoves NewState RemainingMoves}
+				case RemainingMoves of Mv|Rm then
+					State|{ApplyMoves NewState RemainingMoves}
+				else
+					State|NewState|{ApplyMoves NewState RemainingMoves}
+				end
 			end
 		[] trackA(N) then
 			if N>0 then
@@ -44,36 +46,95 @@ define
 					T = {Append Y A}
 					Z = {Take X L-N}
 					B = {GetB State}
-					{System.showInfo {Length Z}}
-					{System.showInfo {Length T}}
-					{System.showInfo {Nth Z 1}}
-					{System.showInfo {Nth T 1}}
 				in
 					state(main:Z trackA:T trackB:B)
 				end
-			elseif N<0 then nil
+			elseif N<0 then
+				local
+					A = {GetA State}
+					X = {GetMain State}
+					L = {Length X}
+					NewA = {Drop A ~N}
+					MovedA = {Take A ~N}
+					Z = {Append X MovedA}
+					B = {GetB State}
+				in
+					state(main:Z trackA:NewA trackB:B)
+				end
 			else nil end
 		[] trackB(N) then
-			if N>0 then nil
-			elseif N<0 then nil
+			if N>0 then
+				local A X L Y T Z B
+					A = {GetB State}
+					X = {GetMain State}
+					L = {Length X}
+					Y = {Drop X L-N}
+					T = {Append Y A}
+					Z = {Take X L-N}
+					B = {GetA State}
+				in
+					state(main:Z trackA:B trackB:T)
+				end
+			elseif N<0 then
+				local
+					A = {GetA State}
+					X = {GetMain State}
+					L = {Length X}
+					NewB = {Drop B ~N}
+					MovedA = {Take A ~N}
+					Z = {Append X MovedA}
+					B = {GetB State}
+				in
+					state(main:Z trackA:A trackB:NewB)
+				end
 			else nil end
 		else nil end
 	end
 
-	local A B X First NewState State NewStateList
-		State = state(main:[a b] trackA:nil trackB:nil)
-		NewStateList = {ApplyMoves State [trackA(1)]}
-		NewState = {Nth NewStateList 2}
-		A = {GetA NewState}
-		B = {GetB NewState}
-		X = {GetMain NewState}
-		{System.showInfo {Length A}}
-		{System.showInfo {Length B}}
-		{System.showInfo {Length X}}
-		First = {Nth A 1}
-	in
-		{System.showInfo First}
+	proc {PrintList List}
+		case List of X|Xs then
+			{System.showInfo X}
+			{PrintList Xs}
+		else skip end
 	end
+
+	proc {PrintState State}
+		local
+			A = {GetA State}
+			B = {GetB State}
+			X = {GetMain State}
+		in
+			{System.showInfo "main:"}
+			if {Length X} > 0 then {PrintList X} end
+			{System.showInfo "trackA:"}
+			if {Length A} > 0 then {PrintList A} end
+			{System.showInfo "trackB:"}
+			if {Length B} > 0 then {PrintList B} end
+		end
+	end
+
+	proc {PrintStatesN StateList N}
+		case StateList of State|List then
+			{System.showInfo "State number"}
+			{System.showInfo N}
+			{PrintState State}
+			{PrintStatesN List N+1}
+		else skip end
+	end
+
+	proc {PrintStates StateList}
+		{PrintStatesN StateList 1}
+	end
+
+	local
+		State = state(main:[a b] trackA:nil trackB:nil)
+		Mvs = [trackA(1) trackA(~1)]
+		NewStateList = {ApplyMoves State Mvs}
+	in
+		{System.showInfo {Length NewStateList}}
+		{PrintStates NewStateList}
+	end
+	{Application.exit 0}
 	{System.showInfo {Length [1 2 4 5 6]}}
 	{System.showInfo {Position [1 2 4 5 6] 4}}
 	{System.showInfo {Nth {Take [1 2 4 5 6] 4} 3}}
@@ -82,7 +143,6 @@ define
 	if {Member [1 2 3 4 5 6] 1} then
 		{System.showInfo "Inside"}
 	end
-
 	{Application.exit 0}
 
 	fun {Factorial Number}
