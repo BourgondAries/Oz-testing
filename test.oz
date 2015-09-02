@@ -103,13 +103,20 @@ define
 		end
 	end
 
-	fun {Find Xs Ys}
+	fun {FindCar Xs Ys}
 		case Xs of nil then nil
 		else
 			case Ys of Y|Yz then
-				case Xs of Hs|Ts then
-					Hs|Y|Ts
-				else nil end
+				local
+					A = {SplitTrain Xs Y}
+					AfterY = {Nth A 2}
+					BeforeY = {Nth A 1}
+					AfterYCount = {Length AfterY+1}
+					BeforeYCount = {Length BeforeY}
+					NewState = AfterY|BeforeY
+				in
+					trackA(AfterYCount)|trackB(BeforeYCount)|trackA(~AfterYCount)|trackB(~BeforeYCount)|{FindCar NewState Yz}
+				end
 			else nil end
 		end
 	end
@@ -158,7 +165,32 @@ define
 		{PrintStates NewStateList}
 	end
 	{System.showInfo {Length {Nth {SplitTrain [1 2 3 4] 1} 2}}}
+	local
+		A = {FindCar [a b] [b a]}
+	in
+		skip
+	end
 	{Application.exit 0}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	{System.showInfo {Length [1 2 4 5 6]}}
 	{System.showInfo {Position [1 2 4 5 6] 4}}
 	{System.showInfo {Nth {Take [1 2 4 5 6] 4} 3}}
