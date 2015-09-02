@@ -111,7 +111,7 @@ define
 					A = {SplitTrain Xs Y}
 					AfterY = {Nth A 2}
 					BeforeY = {Nth A 1}
-					AfterYCount = {Length AfterY+1}
+					AfterYCount = {Length AfterY}+1
 					BeforeYCount = {Length BeforeY}
 					NewState = AfterY|BeforeY
 				in
@@ -168,8 +168,9 @@ define
 	local
 		B = {SplitTrain [a b] b}
 		{System.showInfo {Nth {Nth B 1} 1}}
+		A = {FindCar [a b] [b a]}
 	in
-		skip
+		{System.showInfo {Nth A 4}}
 	end
 	{Application.exit 0}
 
