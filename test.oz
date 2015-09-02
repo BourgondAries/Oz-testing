@@ -80,15 +80,38 @@ define
 					A = {GetA State}
 					X = {GetMain State}
 					L = {Length X}
-					NewB = {Drop B ~N}
-					MovedA = {Take A ~N}
-					Z = {Append X MovedA}
 					B = {GetB State}
+					NewB = {Drop B ~N}
+					MovedA = {Take B ~N}
+					Z = {Append X MovedA}
 				in
 					state(main:Z trackA:A trackB:NewB)
 				end
 			else nil end
 		else nil end
+	end
+
+	fun {SplitTrain Xs Y}
+		local
+			Pos = {Position Xs Y}
+			Hs = {Take Xs Pos-1}
+			Ts = {Drop Xs Pos}
+			Head = if {Length Hs} > 0 then Hs else nil end
+			Tail = if {Length Ts} > 0 then Ts else nil end
+		in
+			[Head]|[Tail]
+		end
+	end
+
+	fun {Find Xs Ys}
+		case Xs of nil then nil
+		else
+			case Ys of Y|Yz then
+				case Xs of Hs|Ts then
+					Hs|Y|Ts
+				else nil end
+			else nil end
+		end
 	end
 
 	proc {PrintList List}
@@ -127,13 +150,14 @@ define
 	end
 
 	local
-		State = state(main:[a b] trackA:nil trackB:nil)
-		Mvs = [trackA(1) trackA(~1)]
+		State = state(main:[a b] trackA:[c] trackB:nil)
+		Mvs = [trackA(1) trackA(~1) trackB(1) trackB(1) trackB(~2) trackA(2) trackA(~3)]
 		NewStateList = {ApplyMoves State Mvs}
 	in
 		{System.showInfo {Length NewStateList}}
 		{PrintStates NewStateList}
 	end
+	{System.showInfo {Length {Nth {SplitTrain [1 2 3 4] 1} 2}}}
 	{Application.exit 0}
 	{System.showInfo {Length [1 2 4 5 6]}}
 	{System.showInfo {Position [1 2 4 5 6] 4}}
@@ -143,6 +167,7 @@ define
 	if {Member [1 2 3 4 5 6] 1} then
 		{System.showInfo "Inside"}
 	end
+
 	{Application.exit 0}
 
 	fun {Factorial Number}
