@@ -25,6 +25,11 @@ define
 		else nil end
 	end
 
+	fun {GetTrack Track}
+		case Track of trackA(N) then N
+		[] trackB(N) then N end
+	end
+
 	fun {ApplyMoves State Moves}
 		case Moves of Move|RemainingMoves then
 			local NewState
@@ -103,6 +108,71 @@ define
 		end
 	end
 
+/*
+	fun {OptimizeTracks List}
+		local
+			First = {Take List 1}
+			Second = {Take {Drop List 1} 1}
+		in
+			case First of trackA(N) then
+				case Second of trackA(M) then
+					trackA(N+M)
+				else
+					trackB(M)
+				end
+			case First of trackB(N) then
+				case Second of trackB(M) then
+					trackB(N+M)
+				else
+					trackA(M)
+				end
+			else
+				nil
+			end
+		end
+	end
+*/
+
+	fun {PrintListPure List}
+		case List of X|Xs then
+			X # ", " # {PrintListPure Xs}
+		else "" end
+	end
+
+	fun {PrintStatePure State}
+		local
+			A = {GetA State}
+			B = {GetB State}
+			X = {GetMain State}
+		in
+			"main: " # {PrintListPure X} #
+			"trackA: " # {PrintListPure A} #
+			"trackB: " # {PrintListPure B} # "\n"
+		end
+	end
+
+	fun {PrintStatesPure StateList N}
+		case StateList of State|List then
+			local
+				Name = "State number: " # {IntToString N} # " - "
+			in
+				Name # {PrintStatePure State} # {PrintStatesPure List N+1}
+			end
+		else "" end
+	end
+
+	fun {PrintTrackListPure Tracks}
+		case Tracks of X|Xs then
+			{PrintTrackListPure X} # {PrintTrackListPure Xs}
+		[] trackA(N ...) then
+			"trackA(" # {IntToString N} # "), "
+		[] trackB(N ...) then
+			"trackB(" # {IntToString N} # "), "
+		else
+			nil
+		end
+	end
+
 	fun {FindCar Xs Ys}
 		case Xs of nil then nil
 		[] X|Xt then
@@ -116,7 +186,7 @@ define
 						BeforeY = {Nth A 1}
 						YWithAfterYCount = {Length AfterY}+1
 						BeforeYCount = {Length BeforeY}
-						NewState = AfterY|BeforeY
+						NewState = AfterY#BeforeY
 					in
 						trackA(YWithAfterYCount)|trackB(BeforeYCount)|trackA(~YWithAfterYCount)|trackB(~BeforeYCount)|{FindCar NewState Yz}
 					end
@@ -125,58 +195,16 @@ define
 		else nil end
 	end
 
-	proc {PrintList List}
-		case List of X|Xs then
-			{System.showInfo X}
-			{PrintList Xs}
-		else skip end
-	end
-
-	proc {PrintState State}
-		local
-			A = {GetA State}
-			B = {GetB State}
-			X = {GetMain State}
-		in
-			{System.showInfo "main:"}
-			if {Length X} > 0 then {PrintList X} end
-			{System.showInfo "trackA:"}
-			if {Length A} > 0 then {PrintList A} end
-			{System.showInfo "trackB:"}
-			if {Length B} > 0 then {PrintList B} end
-		end
-	end
-
-	proc {PrintStatesN StateList N}
-		case StateList of State|List then
-			{System.showInfo "State number"}
-			{System.showInfo N}
-			{PrintState State}
-			{PrintStatesN List N+1}
-		else skip end
-	end
-
-	proc {PrintStates StateList}
-		{PrintStatesN StateList 1}
-	end
 
 	local
-		State = state(main:[a b] trackA:[c] trackB:nil)
-		Mvs = [trackA(1) trackA(~1) trackB(1) trackB(1) trackB(~2) trackA(2) trackA(~3)]
+		State = state(main:[a b] trackA:nil trackB:nil)
+		Mvs = [trackA(1) trackB(1) trackA(~1)]
 		NewStateList = {ApplyMoves State Mvs}
 	in
-		{System.showInfo {Length NewStateList}}
-		{PrintStates NewStateList}
+		{System.showInfo {PrintStatesPure NewStateList 1}}
+		{System.showInfo {PrintTrackListPure Mvs}}
 	end
-	{System.showInfo {Length {Nth {SplitTrain [1 2 3 4] 1} 2}}}
-	local
-		B = {SplitTrain [a b] b}
-		{System.showInfo {Nth {Nth B 1} 1}}
-		A = {FindCar [a b] [b a]}
-	in
-		{System.showInfo {Length A}}
-		{System.showInfo {Nth A 6}}
-	end
-	{Application.exit 0}
 
+	{System.showInfo {PrintTrackListPure {FindCar [a b] [b a]}}}
+	{Application.exit 0}
 end
