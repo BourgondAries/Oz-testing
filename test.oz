@@ -5,6 +5,67 @@ import
 	System
 define
 
+	fun {PrintListPure List}
+		case List of X|Xs then
+			X # ", " # {PrintListPure Xs}
+		else "" end
+	end
+
+	Append = proc {$ As Bs ?Out}
+		case As of nil then
+			Out = Bs
+		else
+			case As of '|'(A Ar) then
+				local X in
+					{Append Ar Bs X}
+					Out = '|'(A X)
+				end
+			end
+		end
+	end
+
+	Max = proc {$ X Y ?Out}
+		if X==0 then
+			Out = Y
+		else
+			if Y==0 then
+				Out = X
+			else
+				Out = 1+{Max X-1 Y-1}
+			end
+		end
+	end
+
+	local
+		B = nil
+		A = 1|2|B = 1|2|3|4|B
+	in
+		{System.showInfo {PrintListPure A}}
+	end
+
+	local
+		D = [1 A B 3 4] = 1|2|nil|3|4|B
+		A = 2
+		B = nil
+	in
+		{System.showInfo {PrintListPure D}}
+	end
+
+	local X = 3 Y = 6 Z in
+		{Max X Y Z}
+		{System.showInfo Z}
+	end
+
+	local
+		A
+		{Append [1 2] [5 7] A}
+	in
+		{System.showInfo {PrintListPure A}}
+		{System.showInfo {PrintListPure 3|[1 2]}}
+	end
+
+	{Application.exit 0}
+
 	\insert List.oz
 
 	fun {GetMain State}
@@ -133,11 +194,6 @@ define
 	end
 */
 
-	fun {PrintListPure List}
-		case List of X|Xs then
-			X # ", " # {PrintListPure Xs}
-		else "" end
-	end
 
 	fun {PrintStatePure State}
 		local
@@ -195,6 +251,31 @@ define
 		else nil end
 	end
 
+	fun {Compress Cars}
+		case Cars of X|Xs then
+			case Xs of Xss|Xsss then
+				case X of trackA(N ...) then
+					case Xss of trackA(M ...) then
+						{Compress trackA(M+N)|Xsss}
+					else
+						X|Xss|{Compress Xsss}
+					end
+				[] trackB(N ...) then
+					case Xss of trackB(M ...) then
+						{Compress trackB(M+N)|Xsss}
+					else
+						X|Xss|{Compress Xsss}
+					end
+				end
+			else
+				X|{Compress Xs}
+			end
+		else nil end
+	end
+
+	fun {FewFindCar Xs Ys}
+		{Compress {FindCar Xs Ys}}
+	end
 
 	local
 		State = state(main:[a b] trackA:nil trackB:nil)
@@ -206,5 +287,8 @@ define
 	end
 
 	{System.showInfo {PrintTrackListPure {FindCar [a b] [b a]}}}
+	{System.showInfo {PrintTrackListPure {FindCar [c a b] [c b a]}}}
+	{System.showInfo {PrintTrackListPure {Compress [trackB(1) trackB(2) trackA(1) trackA(1)]}}}
+	{System.showInfo {PrintTrackListPure [trackA(1) trackA(1)]}}
 	{Application.exit 0}
 end
